@@ -24,7 +24,7 @@ jobs:
 
       - name: Generate HTML pages
         run: |
-          mv ./documents ./output/document/
+          mv ./documents ./output/document
           python generate_site.py
           cp archivo.db output/archivo.db
 
