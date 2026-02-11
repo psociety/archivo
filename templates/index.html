@@ -473,21 +473,22 @@
 
             const html = `
                 <div class="col-md-6 col-xl-4">
-                    <div class="card event-card">
-                        <div style="height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e9ecef;">
-                            <img src="${imgSrc}" class="card-img-top" style="height: 100%; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='document/${doc.id}/preview.jpg';">
-                        </div>
-                        <div class="card-body">
-                            <div class="event-meta">${doc.source || ''}</div>
-                            <div class="event-title"><a href="document/${doc.id}/"
-                                    style="text-decoration: none; color: inherit;">${doc.name || 'Sin título'}</a></div>
-                            <div class="small text-muted">${doc.country || ''}</div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div class="event-date">${dateStr}</div>
-                                <button class="add-btn">+</button>
+                    <a href="document/${doc.id}/"
+                                    style="text-decoration: none; color: inherit;">
+                        <div class="card event-card">
+                            <div style="height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e9ecef;">
+                                <img src="${imgSrc}" class="card-img-top" style="height: 100%; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='document/${doc.id}/preview.jpg';">
+                            </div>
+                            <div class="card-body">
+                                <div class="event-meta">${doc.source || ''}</div>
+                                <div class="event-title">${doc.name || 'Sin título'}</div>
+                                <div class="small text-muted">${doc.country || ''}</div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div class="event-date">${dateStr}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             `;
             resultsContainer.insertAdjacentHTML('beforeend', html);
