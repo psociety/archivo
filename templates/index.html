@@ -264,6 +264,117 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- SQL.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+
+    <script>
+        let db = null;
+        let stmt = null;
+
+        // Initialize SQL.js and load the database
+        async function initDB() {
+            const config = {
+                locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}`
+            };
+            const SQL = await initSqlJs(config);
+
+            // Fetch the database file. Assuming it's in the same directory as index.html
+            const dataPromise = fetch('archivo.db').then(res => res.arrayBuffer());
+            const [buf] = await Promise.all([dataPromise]);
+
+            db = new SQL.Database(new Uint8Array(buf));
+            console.log("Database loaded");
+        }
+
+        // Initialize on load
+        initDB();
+
+        const searchInput = document.querySelector('.search-input');
+        const exactSwitch = document.getElementById('exactSwitch');
+        const resultsContainer = document.querySelector('.row.g-4');
+        const resultsCount = document.querySelector('.results-count');
+
+        function performSearch() {
+            if (!db) return;
+
+            const queryText = searchInput.value.trim();
+
+            // If empty query, showing all (or top 10 as default) could be an option, 
+            // but for now let's show all matching empty string which is everything if we use LIKE %%
+            // However, typically search clears or resets.
+            // Let's implement: if empty, maybe reload page or just show all? 
+            // The python script generates default view with top 10. 
+            // Client side search might want to filter THAT list or replace it.
+            // Let's replace it.
+
+            let sql = "SELECT * FROM documents";
+            let params = {};
+
+            if (queryText) {
+                const isExact = exactSwitch.checked;
+                if (isExact) {
+                    sql += " WHERE name = :q OR source = :q OR language = :q OR country = :q OR tags = :q OR uploader = :q";
+                    params = { ':q': queryText };
+                } else {
+                    sql += " WHERE name LIKE :q OR source LIKE :q OR language LIKE :q OR country LIKE :q OR tags LIKE :q OR uploader LIKE :q";
+                    params = { ':q': `%${queryText}%` };
+                }
+            }
+
+            // Add sorting if needed, for now just default or by created_irl_at
+            sql += " ORDER BY created_irl_at DESC LIMIT 50";
+
+            const stmt = db.prepare(sql);
+            stmt.bind(params);
+
+            resultsContainer.innerHTML = ''; // Clear current results
+            let count = 0;
+
+            while (stmt.step()) {
+                const row = stmt.getAsObject();
+                count++;
+                appendResult(row, count);
+            }
+
+            resultsCount.textContent = `${count} resultado${count !== 1 ? 's' : ''}`;
+
+            stmt.free();
+        }
+
+        function appendResult(doc, index) {
+            const dateStr = doc.created_irl_at ? new Date(doc.created_irl_at * 1000).toISOString().split('T')[0] : '';
+            const html = `
+                <div class="col-md-6 col-xl-4">
+                    <div class="card event-card">
+                        <img src="https://picsum.photos/600/400?${index}" class="card-img-top">
+                        <div class="card-body">
+                            <div class="event-meta">${doc.source || ''}</div>
+                            <div class="event-title"><a href="document/${doc.id}.html"
+                                    style="text-decoration: none; color: inherit;">${doc.name || 'Sin título'}</a></div>
+                            <div class="small text-muted">${doc.country || ''}</div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="event-date">${dateStr}</div>
+                                <button class="add-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultsContainer.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Debounce search
+        let timeout = null;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(performSearch, 300);
+        });
+
+        if (exactSwitch) {
+            exactSwitch.addEventListener('change', performSearch);
+        }
+
+    </script>
 </body>
 
 </html>
