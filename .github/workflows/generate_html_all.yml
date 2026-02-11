@@ -24,9 +24,9 @@ jobs:
       - name: Generate HTML pages
         env: 
           OVERRIDE_ALL: "1"
-        run: 
-          - python generate_site.py
-          - cp archivo.db output/archivo.db
+        run: |
+          python generate_site.py
+          cp archivo.db output/archivo.db
 
       - name: Deploy to docs branch 
         uses: peaceiris/actions-gh-pages@v3 
