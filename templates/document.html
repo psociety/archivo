@@ -98,7 +98,8 @@
           {% set type = document.type | lower %}
 
           {% if type == 'image' %}
-          <img src="{{ filename }}" alt="{{ document.name }}" class="img-fluid shadow-sm border">
+          <a href="{{ filename }}" class="text-decoration-none"><img src="{{ filename }}" alt="{{ document.name }}"
+              class="img-fluid shadow-sm border"></a>
           {% elif type == 'audio' %}
           <audio controls class="w-100">
             <source src="{{ filename }}">
@@ -136,21 +137,22 @@
 
           <!-- Buttons -->
           <div class="d-flex gap-3 mb-4">
-            <button class="btn btn-outline-primary btn-action">
+            <a href="{{ filename }}" class="btn btn-outline-primary btn-action">
               <i class="bi bi-zoom-in"></i>
               Ampliar
-            </button>
+            </a>
 
-            <button class="btn btn-outline-dark btn-action">
+            <a href="{{ filename }}" class="btn btn-outline-dark btn-action">
               <i class="bi bi-file-earmark-fill"></i>
               Texto completo
-            </button>
+            </a>
           </div>
 
 
           <!-- Metadata table -->
           <div class="metadata">
 
+            {% if document.author %}
             <div class="row my-1 border-light border-2">
               <div class="col-4 fw-semibold">Autor</div>
               <div class="col-8">
@@ -158,7 +160,9 @@
                   }}</a>
               </div>
             </div>
+            {% endif %}
 
+            {% if document.source %}
             <div class="row my-1 border-light border-2">
               <div class="col-4 fw-semibold">Fuente</div>
               <div class="col-8">
@@ -166,7 +170,9 @@
                   }}</a>
               </div>
             </div>
+            {% endif %}
 
+            {% if document.language %}
             <div class="row my-1 border-light border-2">
               <div class="col-4 fw-semibold">Idioma</div>
               <div class="col-8">
@@ -174,21 +180,21 @@
                   document.language }}</a>
               </div>
             </div>
+            {% endif %}
 
+            {% if document.tags %}
             <div class="row my-1 border-light border-2">
               <div class="col-4 fw-semibold">Tags</div>
               <div class="col-8">
-                {% if document.tags %}
                 {% for tag in document.tags.split(',') %}
                 {% set t = tag.strip() %}
                 {% if t %}
                 <a href="/archivo/?tags={{ t }}" class="tag text-decoration-none">{{ t }}</a>
                 {% endif %}
                 {% endfor %}
-                {% endif %}
               </div>
             </div>
-
+            {% endif %}
           </div>
         </div>
       </div>
