@@ -1,6 +1,6 @@
 **Nombre:** Anuncio en periódico de los bancos de RUMASA
 **Fecha:** 1980-03-27
-**Tipo:** imagen
+**Tipo:** Imagen
 **Ficheros:** anuncio-periodico-bancos-de-rumasa.jpg
 **Idioma:** Castellano
 **País:** España
