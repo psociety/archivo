@@ -29,7 +29,7 @@ template = env.get_template("template.html")
 
 # Render one HTML file per row
 for doc in rows:
-    output_path = f"output/{doc['id']}.html"
+    output_path = f"output/document/{doc['id']}.html"
 
     # Skip if file exists and OVERRIDE_ALL is not set
     if not OVERRIDE_ALL and os.path.exists(output_path):
