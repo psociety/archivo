@@ -52,5 +52,5 @@ jobs:
           with: 
             github_token: ${{ secrets.GITHUB_TOKEN }} 
             publish_branch: docs 
-            publish_dir: ./documents 
+            publish_dir: ./output 
             force_orphan: true
