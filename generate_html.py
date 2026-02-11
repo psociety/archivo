@@ -25,7 +25,7 @@ def format_date(value, fmt="%Y-%m-%d"):
 env.filters["format_date"] = format_date
 
 # Load your template
-template = env.get_template("template.html")
+template = env.get_template("templates/document.html")
 
 # Render one HTML file per row
 for doc in rows:
