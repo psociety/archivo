@@ -2,7 +2,6 @@ import sqlite3
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 import os
-import os
 
 # Ensure output directory exists
 os.makedirs("output", exist_ok=True)
