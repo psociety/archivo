@@ -24,8 +24,8 @@ jobs:
 
       - name: Generate HTML pages
         run: |
+          mv ./documents ./output/document/
           python generate_site.py
-          mv ./documents ./output/
           cp archivo.db output/archivo.db
 
       - name: Deploy to docs branch 
