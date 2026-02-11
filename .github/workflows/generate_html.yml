@@ -21,8 +21,11 @@ jobs:
       - name: Generate HTML pages
         run: python generate_html.py
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-output
-          path: output/
+      - name: Commit and push generated HTML
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/
+          git commit -m "Update generated HTML" || echo "No changes to commit"
+          git push
+
