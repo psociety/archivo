@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 class SiteGenerator:
-    def __init__(self, db_path="output/archivo.db", output_dir="output"):
+    def __init__(self, db_path="archivo.db", output_dir="output"):
         self.db_path = db_path
         self.output_dir = output_dir
         self.override_all = os.getenv("OVERRIDE_ALL")
@@ -46,7 +46,9 @@ class SiteGenerator:
         os.makedirs(doc_dir, exist_ok=True)
 
         for doc in rows:
-            output_path = os.path.join(doc_dir, f"{doc['id']}.html")
+            documentDir = os.path.join(doc_dir, doc['id'])
+            os.makedirs(documentDir, exist_ok=True)
+            output_path = os.path.join(doc_dir, f"{doc['id']}/index.html")
 
             # Skip if file exists and OVERRIDE_ALL is not set
             if not self.override_all and os.path.exists(output_path):
