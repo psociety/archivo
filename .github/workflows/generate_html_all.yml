@@ -1,4 +1,4 @@
-name: Generate HTML
+name: Generate ALL HTML
 permissions:
   contents: write
 
