@@ -6,7 +6,7 @@ import os
 os.makedirs("output", exist_ok=True)
 
 # Connect and return rows as dict-like objects
-conn = sqlite3.connect("documents.db")
+conn = sqlite3.connect("archivo.db")
 conn.row_factory = sqlite3.Row
 
 rows = conn.execute("SELECT * FROM documents").fetchall()
