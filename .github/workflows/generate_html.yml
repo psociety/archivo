@@ -25,12 +25,12 @@ jobs:
       - name: Generate HTML pages
         run: |
           python generate_site.py
-          cp archivo.db output/archivo.db
+          cp archivo.db documents/archivo.db
 
       - name: Deploy to docs branch 
         uses: peaceiris/actions-gh-pages@v3 
         with: 
           github_token: ${{ secrets.GITHUB_TOKEN }} 
           publish_branch: docs 
-          publish_dir: ./output 
+          publish_dir: ./documents 
           force_orphan: true

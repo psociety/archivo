@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 class SiteGenerator:
-    def __init__(self, db_path="archivo.db", output_dir="output"):
+    def __init__(self, db_path="archivo.db", output_dir="documents"):
         self.db_path = db_path
         self.output_dir = output_dir
         self.override_all = os.getenv("OVERRIDE_ALL")
