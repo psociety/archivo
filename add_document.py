@@ -46,11 +46,10 @@ def parse_details_md(file_path):
         
     return metadata
 
-def get_file_hash_id(file_path):
-    """Generates a deterministic ID based on the file path."""
-    # Normalize path to use forward slashes for consistency across OS
-    normalized_path = file_path.replace('\\', '/')
-    return hashlib.md5(normalized_path.encode('utf-8')).hexdigest()
+def get_document_slug(file_path):
+    """Generates the ID based on the directory slug."""
+    # The slug is the name of the parent directory
+    return os.path.basename(os.path.dirname(os.path.abspath(file_path)))
 
 def update_database(db_path, file_path, metadata):
     """Updates the database with the parsed metadata."""
@@ -60,9 +59,11 @@ def update_database(db_path, file_path, metadata):
     # Map metadata keys to database columns
     # DB Schema: id, name, type, files, created_irl_at, language, source, country, tags, uploader, created_at
     
-    doc_id = get_file_hash_id(file_path)
+    doc_id = get_document_slug(file_path)
     name = metadata.get('Nombre', '')
-    doc_type = metadata.get('Tipo', '')
+    doc_type = metadata.get('Tipo', '').lower()
+    if doc_type == 'imagen':
+        doc_type = 'image'
     files = metadata.get('Ficheros', '')
     
     # Parse date
