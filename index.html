@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Explorar</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Google Font (optional, similar elegant feel) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            color: #1f1f1f;
+        }
+
+        h1.title {
+            font-family: 'Playfair Display', serif;
+            font-size: 64px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        /* Search Bar */
+        .search-wrapper {
+            max-width: 900px;
+            margin: 0 auto 2rem auto;
+            position: relative;
+        }
+
+        .search-input {
+            height: 60px;
+            border: 2px solid #000;
+            border-radius: 0;
+            padding-left: 20px;
+            padding-right: 60px;
+            font-size: 15px;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #000;
+        }
+
+        /* Sidebar */
+        .filter-box {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            padding: 25px;
+        }
+
+        .filter-box h6 {
+            font-weight: 600;
+            letter-spacing: .5px;
+            margin-bottom: 20px;
+        }
+
+        .filter-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        /* Results header */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .results-count {
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .sort-select {
+            width: auto;
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .event-card {
+            background: #fff;
+            border: none;
+            transition: transform .2s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .event-card img {
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .event-meta {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6c757d;
+        }
+
+        .event-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 5px 0;
+        }
+
+        .event-date {
+            font-size: 13px;
+            letter-spacing: .5px;
+            color: #6c757d;
+        }
+
+        .add-btn {
+            border: 1px solid #000;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: #fff;
+        }
+
+        @media (max-width: 992px) {
+            .title {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container py-5">
+
+        <!-- Title -->
+        <div class="text-center">
+            <h1 class="title">Explorar</h1>
+        </div>
+
+        <!-- Search -->
+        <div class="search-wrapper">
+            <input type="text" class="form-control search-input" placeholder="¿QUÉ ESTÁS BUSCANDO?">
+            <i class="bi bi-search search-icon"></i>
+        </div>
+
+        <div class="text-center mb-4">
+            <div class="form-check form-switch d-inline-flex align-items-center gap-2">
+                <input class="form-check-input" type="checkbox" id="exactSwitch">
+                <label class="form-check-label small" for="exactSwitch">
+                    Solo coincidencias exactas
+                </label>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="filter-box">
+                    <h6>FILTROS</h6>
+
+                    <!-- Tags -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">ETIQUETAS</label>
+                        <input type="text" class="form-control form-control-sm mb-2" id="tagInput"
+                            placeholder="Escriba y presione Enter...">
+                        <div id="tagChips" class="d-flex flex-wrap gap-1"></div>
+                    </div>
+
+                    <!-- Language -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">IDIOMA</label>
+                        <div id="filter-language"></div>
+                    </div>
+
+                    <!-- Source -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">FUENTE</label>
+                        <div id="filter-source"></div>
+                    </div>
+
+                    <!-- Country -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">PAÍS</label>
+                        <div id="filter-country"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="col-lg-9">
+
+                <div class="results-header">
+                    <div class="results-count">0 resultados</div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small">Ordenado por</span>
+                        <select class="form-select sort-select">
+                            <option value="created_irl_at DESC">Fecha descendente</option>
+                            <option value="created_irl_at ASC">Fecha ascendente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cards -->
+                <div class="row g-4" id="results-container">
+                    <!-- Results will be injected here -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SQL.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+
+    <script>
+        let db = null;
+        let selectedTags = [];
+
+        // UI Elements
+        const searchInput = document.querySelector('.search-input');
+        const exactSwitch = document.getElementById('exactSwitch');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsCount = document.querySelector('.results-count');
+        const sortSelect = document.querySelector('.sort-select');
+        const tagInput = document.getElementById('tagInput');
+        const tagChipsContainer = document.getElementById('tagChips');
+
+        // Initialize SQL.js and load the database
+        async function initDB() {
+            const config = {
+                locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}`
+            };
+            const SQL = await initSqlJs(config);
+
+            // Fetch the database file. Assuming it's in the same directory as index.html
+            const dataPromise = fetch('archivo.db').then(res => res.arrayBuffer());
+            const [buf] = await Promise.all([dataPromise]);
+
+            db = new SQL.Database(new Uint8Array(buf));
+            console.log("Database loaded");
+
+            populateFilters();
+            loadFiltersFromURL();
+            performSearch();
+        }
+
+        // Initialize on load
+        initDB();
+
+        function populateFilters() {
+            populateCheckboxFilter('language', 'filter-language');
+            populateCheckboxFilter('source', 'filter-source');
+            populateCheckboxFilter('country', 'filter-country');
+        }
+
+        function populateCheckboxFilter(column, containerId) {
+            const container = document.getElementById(containerId);
+            const stmt = db.prepare(`SELECT DISTINCT ${column} FROM documents WHERE ${column} IS NOT NULL AND ${column} != '' ORDER BY ${column}`);
+
+            while (stmt.step()) {
+                const row = stmt.getAsObject();
+                const value = row[column];
+
+                const div = document.createElement('div');
+                div.className = 'filter-item';
+                div.innerHTML = `
+                    <div>
+                        <input type="checkbox" class="filter-checkbox" data-column="${column}" value="${value}"> ${value}
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+            stmt.free();
+
+            // Add listeners
+            container.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', performSearch);
+            });
+        }
+
+        // Tag Logic
+        tagInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                addTag(tagInput.value);
+            }
+        });
+
+        function addTag(tag) {
+            tag = tag.trim();
+            if (tag && !selectedTags.includes(tag)) {
+                selectedTags.push(tag);
+                renderTags();
+                performSearch();
+            }
+            tagInput.value = '';
+        }
+
+        function removeTag(tag) {
+            selectedTags = selectedTags.filter(t => t !== tag);
+            renderTags();
+            performSearch();
+        }
+
+        function renderTags() {
+            tagChipsContainer.innerHTML = selectedTags.map(tag => `
+                <span class="badge bg-secondary d-flex align-items-center gap-2">
+                    ${tag}
+                    <i class="bi bi-x-lg" style="cursor: pointer; font-size: 0.8em;" onclick="removeTag('${tag}')"></i>
+                </span>
+            `).join('');
+        }
+
+        function performSearch() {
+            if (!db) return;
+
+            const queryText = searchInput.value.trim();
+            let sql = "SELECT * FROM documents WHERE 1=1";
+            let params = {};
+            let paramIndex = 0;
+
+            // Text Search
+            if (queryText) {
+                const isExact = exactSwitch.checked;
+                const op = isExact ? '=' : 'LIKE';
+                const val = isExact ? queryText : `%${queryText}%`;
+
+                sql += ` AND (name ${op} :q OR source ${op} :q OR language ${op} :q OR country ${op} :q OR tags ${op} :q OR uploader ${op} :q)`;
+                params[':q'] = val;
+            }
+
+            // Filter Checkboxes
+            ['language', 'source', 'country'].forEach(col => {
+                const checked = Array.from(document.querySelectorAll(`#filter-${col} input:checked`)).map(cb => cb.value);
+                if (checked.length > 0) {
+                    const placeholders = checked.map((_, i) => `:p${col}${i}`).join(',');
+                    sql += ` AND ${col} IN (${placeholders})`;
+                    checked.forEach((val, i) => {
+                        params[`:p${col}${i}`] = val;
+                    });
+                }
+            });
+
+            // Tags Filter
+            if (selectedTags.length > 0) {
+                const tagClauses = selectedTags.map((_, i) => `tags LIKE :tag${i}`).join(' OR ');
+                sql += ` AND (${tagClauses})`;
+                selectedTags.forEach((tag, i) => {
+                    params[`:tag${i}`] = `%${tag}%`;
+                });
+            }
+
+            // Sort
+            sql += ` ORDER BY ${sortSelect.value} LIMIT 50`;
+
+            const stmt = db.prepare(sql);
+            stmt.bind(params);
+
+            resultsContainer.innerHTML = ''; // Clear current results
+            let count = 0;
+
+            while (stmt.step()) {
+                const row = stmt.getAsObject();
+                count++;
+                appendResult(row, count);
+            }
+
+            resultsCount.textContent = `${count} resultado${count !== 1 ? 's' : ''}`;
+            stmt.free();
+            updateURLParams();
+        }
+
+        function updateURLParams() {
+            const params = new URLSearchParams();
+
+            // Search
+            const query = searchInput.value.trim();
+            if (query) params.set('q', query);
+
+            // Exact match
+            if (exactSwitch.checked) params.set('exact', '1');
+
+            // Tags
+            if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
+
+            // Sort
+            if (sortSelect.value !== 'created_irl_at DESC') params.set('sort', sortSelect.value);
+
+            // Checkboxes
+            ['language', 'source', 'country'].forEach(col => {
+                const checked = Array.from(document.querySelectorAll(`#filter-${col} input:checked`)).map(cb => cb.value);
+                if (checked.length > 0) params.set(col, checked.join(','));
+            });
+
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        function loadFiltersFromURL() {
+            const params = new URLSearchParams(window.location.search);
+
+            // Search
+            if (params.has('q')) searchInput.value = params.get('q');
+
+            // Exact
+            if (params.get('exact') === '1') exactSwitch.checked = true;
+
+            // Tags
+            if (params.has('tags')) {
+                const tags = params.get('tags').split(',').filter(t => t.trim() !== '');
+                tags.forEach(tag => {
+                    if (!selectedTags.includes(tag)) selectedTags.push(tag);
+                });
+                renderTags();
+            }
+
+            // Sort
+            if (params.has('sort')) {
+                sortSelect.value = params.get('sort');
+            }
+
+            // Checkboxes
+            ['language', 'source', 'country'].forEach(col => {
+                if (params.has(col)) {
+                    const values = params.get(col).split(',');
+                    const checkboxes = document.querySelectorAll(`#filter-${col} input`);
+                    checkboxes.forEach(cb => {
+                        if (values.includes(cb.value)) cb.checked = true;
+                    });
+                }
+            });
+        }
+
+        function appendResult(doc, index) {
+            const dateStr = doc.created_irl_at ? new Date(doc.created_irl_at * 1000).toISOString().split('T')[0] : '';
+
+            let imgSrc = `document/${doc.id}/preview.jpg`;
+            if (doc.files) {
+                const firstFile = doc.files.split(',')[0].trim();
+                if (/\.(jpg|jpeg|png|gif|webp)$/i.test(firstFile)) {
+                    imgSrc = `document/${doc.id}/${firstFile}`;
+                }
+            }
+
+            const html = `
+                <div class="col-md-6 col-xl-4">
+                    <a href="document/${doc.id}/"
+                                    style="text-decoration: none; color: inherit;">
+                        <div class="card event-card">
+                            <div style="height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e9ecef;">
+                                <img src="${imgSrc}" class="card-img-top" style="height: 100%; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='document/${doc.id}/preview.jpg';">
+                            </div>
+                            <div class="card-body">
+                                <div class="event-meta">${doc.source || ''}</div>
+                                <div class="event-title">${doc.name || 'Sin título'}</div>
+                                <div class="small text-muted">${doc.country || ''}</div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div class="event-date">${dateStr}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            `;
+            resultsContainer.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Debounce search
+        let timeout = null;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(performSearch, 300);
+        });
+
+        if (exactSwitch) {
+            exactSwitch.addEventListener('change', performSearch);
+        }
+
+        sortSelect.addEventListener('change', performSearch);
+
+    </script>
+</body>
+
+</html>
