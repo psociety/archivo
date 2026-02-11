@@ -24,8 +24,8 @@ jobs:
 
       - name: Generate HTML pages
         run:
-          python generate_site.py
-          cp archivo.db output/archivo.db
+          - python generate_site.py
+          - cp archivo.db output/archivo.db
 
       - name: Deploy to docs branch 
         uses: peaceiris/actions-gh-pages@v3 
