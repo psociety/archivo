@@ -1,0 +1,48 @@
+name: Update Database
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'documents/**/details.md'
+
+jobs:
+  update-db:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: documents/**/details.md
+
+      - name: Update Database
+        if: steps.changed-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "Processing $file"
+            python add_document.py "$file"
+          done
+
+      - name: Commit changes
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add archivo.db
+          git commit -m "Update archivo.db with new documents" || echo "No changes to commit"
+          git push
