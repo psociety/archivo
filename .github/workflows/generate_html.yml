@@ -23,7 +23,7 @@ jobs:
         run: pip install jinja2
 
       - name: Generate HTML pages
-        run: python generate_html.py
+        run: python generate_site.py
 
       - name: Deploy to docs branch 
         uses: peaceiris/actions-gh-pages@v3 
