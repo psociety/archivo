@@ -269,6 +269,7 @@
             console.log("Database loaded");
 
             populateFilters();
+            loadFiltersFromURL();
             performSearch();
         }
 
@@ -395,6 +396,68 @@
 
             resultsCount.textContent = `${count} resultado${count !== 1 ? 's' : ''}`;
             stmt.free();
+            updateURLParams();
+        }
+
+        function updateURLParams() {
+            const params = new URLSearchParams();
+
+            // Search
+            const query = searchInput.value.trim();
+            if (query) params.set('q', query);
+
+            // Exact match
+            if (exactSwitch.checked) params.set('exact', '1');
+
+            // Tags
+            if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
+
+            // Sort
+            if (sortSelect.value !== 'created_irl_at DESC') params.set('sort', sortSelect.value);
+
+            // Checkboxes
+            ['language', 'source', 'country'].forEach(col => {
+                const checked = Array.from(document.querySelectorAll(`#filter-${col} input:checked`)).map(cb => cb.value);
+                if (checked.length > 0) params.set(col, checked.join(','));
+            });
+
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        function loadFiltersFromURL() {
+            const params = new URLSearchParams(window.location.search);
+
+            // Search
+            if (params.has('q')) searchInput.value = params.get('q');
+
+            // Exact
+            if (params.get('exact') === '1') exactSwitch.checked = true;
+
+            // Tags
+            if (params.has('tags')) {
+                const tags = params.get('tags').split(',').filter(t => t.trim() !== '');
+                tags.forEach(tag => {
+                    if (!selectedTags.includes(tag)) selectedTags.push(tag);
+                });
+                renderTags();
+            }
+
+            // Sort
+            if (params.has('sort')) {
+                sortSelect.value = params.get('sort');
+            }
+
+            // Checkboxes
+            ['language', 'source', 'country'].forEach(col => {
+                if (params.has(col)) {
+                    const values = params.get(col).split(',');
+                    const checkboxes = document.querySelectorAll(`#filter-${col} input`);
+                    checkboxes.forEach(cb => {
+                        if (values.includes(cb.value)) cb.checked = true;
+                    });
+                }
+            });
         }
 
         function appendResult(doc, index) {
