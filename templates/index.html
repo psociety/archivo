@@ -462,10 +462,21 @@
 
         function appendResult(doc, index) {
             const dateStr = doc.created_irl_at ? new Date(doc.created_irl_at * 1000).toISOString().split('T')[0] : '';
+
+            let imgSrc = `document/${doc.id}/preview.jpg`;
+            if (doc.files) {
+                const firstFile = doc.files.split(',')[0].trim();
+                if (/\.(jpg|jpeg|png|gif|webp)$/i.test(firstFile)) {
+                    imgSrc = `document/${doc.id}/${firstFile}`;
+                }
+            }
+
             const html = `
                 <div class="col-md-6 col-xl-4">
                     <div class="card event-card">
-                        <img src="https://picsum.photos/600/400?${index}" class="card-img-top">
+                        <div style="height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e9ecef;">
+                            <img src="${imgSrc}" class="card-img-top" style="height: 100%; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='document/${doc.id}/preview.jpg';">
+                        </div>
                         <div class="card-body">
                             <div class="event-meta">${doc.source || ''}</div>
                             <div class="event-title"><a href="document/${doc.id}/"
