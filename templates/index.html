@@ -180,41 +180,32 @@
             <!-- Sidebar -->
             <div class="col-lg-3 mb-4">
                 <div class="filter-box">
-                    <h6>TIPO DE CONTENIDO</h6>
+                    <h6>FILTROS</h6>
 
-                    <div class="filter-item">
-                        <div>
-                            <input type="checkbox"> Proyecto didáctico
-                        </div>
-                        <span>26</span>
+                    <!-- Tags -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">ETIQUETAS</label>
+                        <input type="text" class="form-control form-control-sm mb-2" id="tagInput"
+                            placeholder="Escriba y presione Enter...">
+                        <div id="tagChips" class="d-flex flex-wrap gap-1"></div>
                     </div>
 
-                    <div class="filter-item">
-                        <div>
-                            <input type="checkbox"> Artista
-                        </div>
-                        <span>89</span>
+                    <!-- Language -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">IDIOMA</label>
+                        <div id="filter-language"></div>
                     </div>
 
-                    <div class="filter-item">
-                        <div>
-                            <input type="checkbox"> Colección
-                        </div>
-                        <span>168</span>
+                    <!-- Source -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">FUENTE</label>
+                        <div id="filter-source"></div>
                     </div>
 
-                    <div class="filter-item">
-                        <div>
-                            <input type="checkbox"> Exposición
-                        </div>
-                        <span>295</span>
-                    </div>
-
-                    <div class="filter-item">
-                        <div>
-                            <input type="checkbox"> Actividad
-                        </div>
-                        <span>8.004</span>
+                    <!-- Country -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">PAÍS</label>
+                        <div id="filter-country"></div>
                     </div>
 
                 </div>
@@ -224,37 +215,20 @@
             <div class="col-lg-9">
 
                 <div class="results-header">
-                    <div class="results-count">15.760 resultados</div>
+                    <div class="results-count">0 resultados</div>
 
                     <div class="d-flex align-items-center gap-2">
                         <span class="small">Ordenado por</span>
                         <select class="form-select sort-select">
-                            <option>Fecha descendente</option>
-                            <option>Fecha ascendente</option>
+                            <option value="created_irl_at DESC">Fecha descendente</option>
+                            <option value="created_irl_at ASC">Fecha ascendente</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Cards -->
-                <div class="row g-4">
-                    {% for doc in documents %}
-                    <!-- Card {{ loop.index }} -->
-                    <div class="col-md-6 col-xl-4">
-                        <div class="card event-card">
-                            <img src="https://picsum.photos/600/400?{{ loop.index }}" class="card-img-top">
-                            <div class="card-body">
-                                <div class="event-meta">{{ doc.source }}</div>
-                                <div class="event-title"><a href="document/{{ doc.id }}/"
-                                        style="text-decoration: none; color: inherit;">{{ doc.name }}</a></div>
-                                <div class="small text-muted">{{ doc.country }}</div>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <div class="event-date">{{ doc.created_irl_at|format_date }}</div>
-                                    <button class="add-btn">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div class="row g-4" id="results-container">
+                    <!-- Results will be injected here -->
                 </div>
 
             </div>
@@ -269,7 +243,16 @@
 
     <script>
         let db = null;
-        let stmt = null;
+        let selectedTags = [];
+
+        // UI Elements
+        const searchInput = document.querySelector('.search-input');
+        const exactSwitch = document.getElementById('exactSwitch');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsCount = document.querySelector('.results-count');
+        const sortSelect = document.querySelector('.sort-select');
+        const tagInput = document.getElementById('tagInput');
+        const tagChipsContainer = document.getElementById('tagChips');
 
         // Initialize SQL.js and load the database
         async function initDB() {
@@ -284,45 +267,119 @@
 
             db = new SQL.Database(new Uint8Array(buf));
             console.log("Database loaded");
+
+            populateFilters();
+            performSearch();
         }
 
         // Initialize on load
         initDB();
 
-        const searchInput = document.querySelector('.search-input');
-        const exactSwitch = document.getElementById('exactSwitch');
-        const resultsContainer = document.querySelector('.row.g-4');
-        const resultsCount = document.querySelector('.results-count');
+        function populateFilters() {
+            populateCheckboxFilter('language', 'filter-language');
+            populateCheckboxFilter('source', 'filter-source');
+            populateCheckboxFilter('country', 'filter-country');
+        }
+
+        function populateCheckboxFilter(column, containerId) {
+            const container = document.getElementById(containerId);
+            const stmt = db.prepare(`SELECT DISTINCT ${column} FROM documents WHERE ${column} IS NOT NULL AND ${column} != '' ORDER BY ${column}`);
+
+            while (stmt.step()) {
+                const row = stmt.getAsObject();
+                const value = row[column];
+
+                const div = document.createElement('div');
+                div.className = 'filter-item';
+                div.innerHTML = `
+                    <div>
+                        <input type="checkbox" class="filter-checkbox" data-column="${column}" value="${value}"> ${value}
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+            stmt.free();
+
+            // Add listeners
+            container.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', performSearch);
+            });
+        }
+
+        // Tag Logic
+        tagInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                addTag(tagInput.value);
+            }
+        });
+
+        function addTag(tag) {
+            tag = tag.trim();
+            if (tag && !selectedTags.includes(tag)) {
+                selectedTags.push(tag);
+                renderTags();
+                performSearch();
+            }
+            tagInput.value = '';
+        }
+
+        function removeTag(tag) {
+            selectedTags = selectedTags.filter(t => t !== tag);
+            renderTags();
+            performSearch();
+        }
+
+        function renderTags() {
+            tagChipsContainer.innerHTML = selectedTags.map(tag => `
+                <span class="badge bg-secondary d-flex align-items-center gap-2">
+                    ${tag}
+                    <i class="bi bi-x-lg" style="cursor: pointer; font-size: 0.8em;" onclick="removeTag('${tag}')"></i>
+                </span>
+            `).join('');
+        }
 
         function performSearch() {
             if (!db) return;
 
             const queryText = searchInput.value.trim();
-
-            // If empty query, showing all (or top 10 as default) could be an option, 
-            // but for now let's show all matching empty string which is everything if we use LIKE %%
-            // However, typically search clears or resets.
-            // Let's implement: if empty, maybe reload page or just show all? 
-            // The python script generates default view with top 10. 
-            // Client side search might want to filter THAT list or replace it.
-            // Let's replace it.
-
-            let sql = "SELECT * FROM documents";
+            let sql = "SELECT * FROM documents WHERE 1=1";
             let params = {};
+            let paramIndex = 0;
 
+            // Text Search
             if (queryText) {
                 const isExact = exactSwitch.checked;
-                if (isExact) {
-                    sql += " WHERE name = :q OR source = :q OR language = :q OR country = :q OR tags = :q OR uploader = :q";
-                    params = { ':q': queryText };
-                } else {
-                    sql += " WHERE name LIKE :q OR source LIKE :q OR language LIKE :q OR country LIKE :q OR tags LIKE :q OR uploader LIKE :q";
-                    params = { ':q': `%${queryText}%` };
-                }
+                const op = isExact ? '=' : 'LIKE';
+                const val = isExact ? queryText : `%${queryText}%`;
+
+                sql += ` AND (name ${op} :q OR source ${op} :q OR language ${op} :q OR country ${op} :q OR tags ${op} :q OR uploader ${op} :q)`;
+                params[':q'] = val;
             }
 
-            // Add sorting if needed, for now just default or by created_irl_at
-            sql += " ORDER BY created_irl_at DESC LIMIT 50";
+            // Filter Checkboxes
+            ['language', 'source', 'country'].forEach(col => {
+                const checked = Array.from(document.querySelectorAll(`#filter-${col} input:checked`)).map(cb => cb.value);
+                if (checked.length > 0) {
+                    const placeholders = checked.map((_, i) => `:p${col}${i}`).join(',');
+                    sql += ` AND ${col} IN (${placeholders})`;
+                    checked.forEach((val, i) => {
+                        params[`:p${col}${i}`] = val;
+                    });
+                }
+            });
+
+            // Tags Filter
+            if (selectedTags.length > 0) {
+                const tagClauses = selectedTags.map((_, i) => `tags LIKE :tag${i}`).join(' OR ');
+                sql += ` AND (${tagClauses})`;
+                selectedTags.forEach((tag, i) => {
+                    params[`:tag${i}`] = `%${tag}%`;
+                });
+            }
+
+            // Sort
+            sql += ` ORDER BY ${sortSelect.value} LIMIT 50`;
 
             const stmt = db.prepare(sql);
             stmt.bind(params);
@@ -337,7 +394,6 @@
             }
 
             resultsCount.textContent = `${count} resultado${count !== 1 ? 's' : ''}`;
-
             stmt.free();
         }
 
@@ -373,6 +429,8 @@
         if (exactSwitch) {
             exactSwitch.addEventListener('change', performSearch);
         }
+
+        sortSelect.addEventListener('change', performSearch);
 
     </script>
 </body>
